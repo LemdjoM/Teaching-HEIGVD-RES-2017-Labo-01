@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +45,7 @@ public class Application implements IApplication {
     int numberOfQuotes = 0;
     try {
       numberOfQuotes = Integer.parseInt(args[0]);
+      System.out.println("nombre the quote : " + numberOfQuotes);
     } catch (Exception e) {
       System.err.println("The command accepts a single numeric argument (number of quotes to fetch)");
       System.exit(-1);
@@ -86,12 +88,8 @@ public class Application implements IApplication {
     QuoteClient client = new QuoteClient();
     for (int i = 0; i < numberOfQuotes; i++) {
       Quote quote = client.fetchQuote();
-      /* There is a missing piece here!
-       * As you can see, this method handles the first part of the lab. It uses the web service
-       * client to fetch quotes. We have removed a single line from this method. It is a call to
-       * one method provided by this class, which is responsible for storing the content of the
-       * quote in a text file (and for generating the directories based on the tags).
-       */
+     
+      storeQuote(quote, "quote_" + i + ".txt");
       LOG.info("Received a new joke with " + quote.getTags().size() + " tags.");
       for (String tag : quote.getTags()) {
         LOG.info("> " + tag);
@@ -125,7 +123,22 @@ public class Application implements IApplication {
    * @throws IOException 
    */
   void storeQuote(Quote quote, String filename) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+    
+    /* builds path */
+    String path = Application.WORKSPACE_DIRECTORY + File.separator; 
+    for (String tag : quote.getTags())
+      path += tag + File.separator;
+
+    /* creates tags tree */
+    File file = new File(path);
+    file.mkdirs();
+
+    /* stores quote into file */
+    Writer out = new OutputStreamWriter(new FileOutputStream(new File(path + filename)), "UTF-8");
+
+    out.write(quote.getQuote());
+    out.flush();
+    out.close();
   }
   
   /**
@@ -137,18 +150,18 @@ public class Application implements IApplication {
     explorer.explore(new File(WORKSPACE_DIRECTORY), new IFileVisitor() {
       @Override
       public void visit(File file) {
-        /*
-         * There is a missing piece here. Notice how we use an anonymous class here. We provide the implementation
-         * of the the IFileVisitor interface inline. You just have to add the body of the visit method, which should
-         * be pretty easy (we want to write the filename, including the path, to the writer passed in argument).
-         */
+         try {
+            writer.write(file.getPath());
+         } catch (IOException ex) {
+            Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+         }
       }
     });
   }
   
   @Override
   public String getAuthorEmail() {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+      return "mariepas.lemdjonz@heig-vd.ch";
   }
 
   @Override
@@ -156,5 +169,9 @@ public class Application implements IApplication {
     IFileExplorer explorer = new DFSFileExplorer();
     explorer.explore(new File(WORKSPACE_DIRECTORY), new CompleteFileTransformer());    
   }
+
+   private Writer OutputStreamWriter(FileOutputStream fileOutputStream, String utF8) throws UnsupportedEncodingException {
+      return new OutputStreamWriter(fileOutputStream, utF8);
+   }
 
 }

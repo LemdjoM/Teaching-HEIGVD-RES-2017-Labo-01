@@ -1,0 +1,9 @@
+Olivier Liechti solved
+the Travelling Salesman
+problem in O(1)
+time. Here's the
+pseudo-code: Break salesman
+into N pieces.
+Kick each piece
+to a different
+city.
