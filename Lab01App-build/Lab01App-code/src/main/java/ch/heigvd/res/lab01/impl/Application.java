@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +44,6 @@ public class Application implements IApplication {
     int numberOfQuotes = 0;
     try {
       numberOfQuotes = Integer.parseInt(args[0]);
-      System.out.println("nombre the quote : " + numberOfQuotes);
     } catch (Exception e) {
       System.err.println("The command accepts a single numeric argument (number of quotes to fetch)");
       System.exit(-1);
@@ -82,14 +80,16 @@ public class Application implements IApplication {
     }
   }
 
-  @Override
+ @Override
   public void fetchAndStoreQuotes(int numberOfQuotes) throws IOException {
     clearOutputDirectory();
     QuoteClient client = new QuoteClient();
     for (int i = 0; i < numberOfQuotes; i++) {
       Quote quote = client.fetchQuote();
-     
-      storeQuote(quote, "quote_" + i + ".txt");
+      
+      // We send the quote and the name of the file to the storeQuote function
+      storeQuote(quote, "quote-" + i + ".utf8");
+      
       LOG.info("Received a new joke with " + quote.getTags().size() + " tags.");
       for (String tag : quote.getTags()) {
         LOG.info("> " + tag);
@@ -123,7 +123,6 @@ public class Application implements IApplication {
    * @throws IOException 
    */
   void storeQuote(Quote quote, String filename) throws IOException {
-    
     /* builds path */
     String path = Application.WORKSPACE_DIRECTORY + File.separator; 
     for (String tag : quote.getTags())
@@ -150,18 +149,20 @@ public class Application implements IApplication {
     explorer.explore(new File(WORKSPACE_DIRECTORY), new IFileVisitor() {
       @Override
       public void visit(File file) {
-         try {
-            writer.write(file.getPath());
-         } catch (IOException ex) {
-            Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-         }
+        try {
+          writer.write(file.getPath() + "\n");
+        }
+        catch (IOException ex) {
+          LOG.log(Level.SEVERE, "Could not print the name of the encountered file or directory. {0}", ex.getMessage());
+          ex.printStackTrace();
+        }
       }
     });
   }
   
   @Override
   public String getAuthorEmail() {
-      return "mariepas.lemdjonz@heig-vd.ch";
+    return "mariepas.lemdjonz@heig-vd.ch";
   }
 
   @Override
@@ -169,9 +170,5 @@ public class Application implements IApplication {
     IFileExplorer explorer = new DFSFileExplorer();
     explorer.explore(new File(WORKSPACE_DIRECTORY), new CompleteFileTransformer());    
   }
-
-   private Writer OutputStreamWriter(FileOutputStream fileOutputStream, String utF8) throws UnsupportedEncodingException {
-      return new OutputStreamWriter(fileOutputStream, utF8);
-   }
 
 }

@@ -20,25 +20,18 @@ public class Utils {
    * contain any line separator, then the first element is an empty string.
    */
   public static String[] getNextLine(String lines) {
-      // throw new UnsupportedOperationException("The student has not implemented this method yet.");
-         /*line's separators*/
-         /* The \r\n most be the first one*/
-         String[] delimiters = {"\r\n", "\r", "\n"}; 
-         /*Result extended*/
-         String[] tokens = new String[2];
-         /*There is at least one separator*/
-         for (String delim : delimiters) {
-            int index = lines.indexOf(delim);
-            if (index != -1){
-               tokens[0] = lines.substring(0, index + delim.length());
-               tokens[1] = lines.substring(index + delim.length());
-               return tokens;
-            }
-         }
-         /*There in no separator*/
-         tokens[0] = "";
-         tokens[1] = lines;
-         return tokens;
+    /* notes separators order : "\r\n" separator should be first */
+    String[] separators = {"\r\n", "\n", "\r"}; 
+    
+    /* looks for separators */
+    for (String sep : separators) {
+      int pos = lines.indexOf(sep);
+      if (pos != -1)
+        return new String[] {lines.substring(0, pos + sep.length()), lines.substring(pos + sep.length())};
+    }
+    
+    /* arriving here means no separators have been found */
+    return new String[] {"", lines};  
   }
 
 }
