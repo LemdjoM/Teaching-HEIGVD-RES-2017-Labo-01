@@ -18,77 +18,80 @@ import ch.heigvd.res.lab01.impl.Utils;
  */
 public class FileNumberingFilterWriter extends FilterWriter {
 
-  private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
+   private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
 
-  private int lineNumber = 0;
-  private boolean firstLine = true;
-  private char previousCharacter = '\0';
-  
-  public FileNumberingFilterWriter(Writer out) {
-    super(out);
-  }
+   private int lineNumber = 0;
+   private boolean firstLine = true;
+   private char previousCharacter = '\0';
 
-  @Override
-  public void write(String str, int off, int len) throws IOException {
-    String nextLine[] = Utils.getNextLine(str.substring(off, off+len));
-    String strF = "";
+   public FileNumberingFilterWriter(Writer out) {
+      super(out);
+   }
 
-    if (lineNumber == 0)
-      strF += (++lineNumber) + "\t";
+   @Override
+   public void write(String str, int off, int len) throws IOException {
+      String nextLine[] = Utils.getNextLine(str.substring(off, off + len));
+      String strF = "";
 
-    while (!nextLine[0].isEmpty()) {
-      strF += nextLine[0] + (++lineNumber) + "\t";
-      nextLine = Utils.getNextLine(nextLine[1]);
-    }
+      if (lineNumber == 0) {
+         strF += (++lineNumber) + "\t";
+      }
 
-    strF += nextLine[1];
-    super.write(strF, 0, strF.length());
-  }
+      while (!nextLine[0].isEmpty()) {
+         strF += nextLine[0] + (++lineNumber) + "\t";
+         nextLine = Utils.getNextLine(nextLine[1]);
+      }
 
-  @Override
-  public void write(char[] cbuf, int off, int len) throws IOException {
-    this.write(new String(cbuf), off, len);
-  }
+      strF += nextLine[1];
+      super.write(strF, 0, strF.length());
+   }
 
-  @Override
-  public void write(int c) throws IOException { 
+   @Override
+   public void write(char[] cbuf, int off, int len) throws IOException {
+      this.write(new String(cbuf), off, len);
+   }
 
-    if (lineNumber == 0) {
-      lineNumber = 1;
-      super.write('1');
-      super.write('\t');
-    }
+   @Override
+   public void write(int c) throws IOException {
 
-    switch (c) {
-      case '\n':
-        if (previousCharacter != '\r') {
-          super.write('\n');
-          lineNumber++;
-          String s = Integer.toString(lineNumber);
-          for (int i = 0; i < s.length(); ++i)
-            super.write(s.charAt(i));
-          super.write('\t');
-        }
-        else {
-          super.write('\n');
-          lineNumber++;
-          String s = Integer.toString(lineNumber);
-          for (int i = 0; i < s.length(); ++i)
-            super.write(s.charAt(i));
-          super.write('\t');
-        }
-        break;
-      default:
-        if (previousCharacter == '\r') {
-          lineNumber++;
-          String s = Integer.toString(lineNumber);
-          for (int i = 0; i < s.length(); ++i)
-            super.write(s.charAt(i));
-          super.write('\t');
-        }
-        super.write(c);
-    }
-    previousCharacter = (char)c;
-  }
+      if (lineNumber == 0) {
+         lineNumber = 1;
+         super.write('1');
+         super.write('\t');
+      }
+
+      switch (c) {
+         case '\n':
+            if (previousCharacter != '\r') {
+               super.write('\n');
+               lineNumber++;
+               String s = Integer.toString(lineNumber);
+               for (int i = 0; i < s.length(); ++i) {
+                  super.write(s.charAt(i));
+               }
+               super.write('\t');
+            } else {
+               super.write('\n');
+               lineNumber++;
+               String s = Integer.toString(lineNumber);
+               for (int i = 0; i < s.length(); ++i) {
+                  super.write(s.charAt(i));
+               }
+               super.write('\t');
+            }
+            break;
+         default:
+            if (previousCharacter == '\r') {
+               lineNumber++;
+               String s = Integer.toString(lineNumber);
+               for (int i = 0; i < s.length(); ++i) {
+                  super.write(s.charAt(i));
+               }
+               super.write('\t');
+            }
+            super.write(c);
+      }
+      previousCharacter = (char) c;
+   }
 
 }
